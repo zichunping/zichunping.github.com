@@ -1,12 +1,16 @@
 #一点点说明
 
-这是[BeiYuu.com](http://beiyuu.com)的源码，如果你看了[使用Github Pages建独立博客](http://beiyuu.com/github-pages/)，希望看下去哦：
+博客搭建参考：
+* [使用Github Pages建独立博客](http://beiyuu.com/github-pages/)
+* 搭建一个免费的，无流量的Blog：(http://www.ruanyifeng.com/blog/2012/08/blogging_with_jekyll.html)
 
-* 马上动手，很赞
-* 感谢认可
+* 博客样式复用：(http://beiyuu.com)
 * 推荐阅读：[我为什么写博客？](http://beiyuu.com/why-blog/)
-* 想复用我的设计，没问题，标个出处就好啦
-* 转载也没问题，标个出处呗少年
 * 恩，认真的童鞋最可爱啦~
 
-###请删掉统计代码哦 /_layouts/default.html L38-41
+博客记录：
+* iOS开发过程中的心得以及遇到的问题
+* Linux相关的指示
+* 好玩、实用的工具
+* 随笔
+
