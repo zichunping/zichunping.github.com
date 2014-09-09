@@ -14,3 +14,8 @@
 * 好玩、实用的工具
 * 随笔
 
+博客访问地址：http://zichunping.github.io/
+
+在本地调试、编辑Blog：
+* 需要在工程目录下，比如：blog/zichunping.github.com，中启动jekyll serve，然后在浏览器中访问：http://localhost:4000/
+
