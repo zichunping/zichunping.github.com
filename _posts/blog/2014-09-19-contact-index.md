@@ -38,7 +38,7 @@ contactViewController中新建两个tableView：contactsTableView、indexTableVi
           return [filteredArray count];
         }
 
-##示例代码
+##定义tableView以及数据源
 
        @property (nonatomic,strong) UITableView *contactTableView;
        @property (nonatomic,strong) UITableView *indexTableView;
@@ -46,79 +46,122 @@ contactViewController中新建两个tableView：contactsTableView、indexTableVi
 
 
 ##获取手机通讯录
- /**
- *  导入通讯录
- */
-  -(void) loadContacts{
-    [sectionDic removeAllObjects];
-    [phoneDic   removeAllObjects];
-    [contactDic removeAllObjects];
-    for (int i = 0; i < 26; i++) [sectionDic setObject:[NSMutableArray array] forKey:[NSString stringWithFormat:@"%c",'A'+i]];
-    [sectionDic setObject:[NSMutableArray array] forKey:[NSString stringWithFormat:@"%c",'#']];
+       /**
+        *  导入通讯录
+        *  此方法是重点，sectionDic(NSMutableDictionary),key值为排序联系人姓的首字母(已分组，排序)*，value为姓首字母对应的联系人数组
+       */
+       -(void) loadContacts{
+         [sectionDic removeAllObjects];
+         [phoneDic   removeAllObjects];
+         [contactDic removeAllObjects];
+         for (int i = 0; i < 26; i++) 
+             [sectionDic setObject:[NSMutableArray array] forKey:[NSString stringWithFormat:@"%c",'A'+i]];
+         [sectionDic setObject:[NSMutableArray array] forKey:[NSString stringWithFormat:@"%c",'#']];
     
-    ABAddressBookRef myAddressBook =ABAddressBookCreate();
+         ABAddressBookRef myAddressBook =ABAddressBookCreate();
     
-    CFArrayRef results = ABAddressBookCopyArrayOfAllPeople(myAddressBook);
-    CFMutableArrayRef mresults=CFArrayCreateMutableCopy(kCFAllocatorDefault,
+         CFArrayRef results = ABAddressBookCopyArrayOfAllPeople(myAddressBook);
+         CFMutableArrayRef mresults=CFArrayCreateMutableCopy(kCFAllocatorDefault,
                                                         CFArrayGetCount(results),
                                                         results);
-    //将结果按照拼音排序，将结果放入mresults数组中
-    CFArraySortValues(mresults,
+        //将结果按照拼音排序，将结果放入mresults数组中
+         CFArraySortValues(mresults,
                       CFRangeMake(0, CFArrayGetCount(results)),
                       (CFComparatorFunction) ABPersonComparePeopleByName,
                       (void*) ABPersonGetSortOrdering());
-    //遍历所有联系人
-    for (int k = 0; k < CFArrayGetCount(mresults); k ++) {
-        ABRecordRef record=CFArrayGetValueAtIndex(mresults,k);
-        NSString *personname = (__bridge NSString *)ABRecordCopyCompositeName(record);
-        ABMultiValueRef phone = ABRecordCopyValue(record, kABPersonPhoneProperty);
-        ABRecordID recordID=ABRecordGetRecordID(record);
-        for (int k = 0; k<ABMultiValueGetCount(phone); k++)
-        {
-            NSString * personPhone = (__bridge NSString*)ABMultiValueCopyValueAtIndex(phone, k);
+        //遍历所有联系人
+         for (int k = 0; k < CFArrayGetCount(mresults); k ++) {
+            ABRecordRef record=CFArrayGetValueAtIndex(mresults,k);
+            NSString *personname = (__bridge NSString *)ABRecordCopyCompositeName(record);
+            ABMultiValueRef phone = ABRecordCopyValue(record, kABPersonPhoneProperty);
+            ABRecordID recordID=ABRecordGetRecordID(record);
+            for (int k = 0; k<ABMultiValueGetCount(phone); k++)
+            {
+               NSString * personPhone = (__bridge NSString*)ABMultiValueCopyValueAtIndex(phone, k);
             
-            if (personPhone.length < 3) {
-                continue;
+               if (personPhone.length < 3) {
+                 continue;
+               }
+            
+               NSRange range = NSMakeRange(0,3);
+               NSString *str=[personPhone substringWithRange:range];
+               if ([str isEqualToString:@"+86"]) {
+                  personPhone=[personPhone substringFromIndex:3];
+               }
+            
+              [phoneDic setObject:(__bridge id)(record) forKey:[NSString stringWithFormat:@"%@%d",personPhone,recordID]];
+            
+            
             }
-            
-            NSRange range = NSMakeRange(0,3);
-            NSString *str=[personPhone substringWithRange:range];
-            if ([str isEqualToString:@"+86"]) {
-                personPhone=[personPhone substringFromIndex:3];
+            char first=pinyinFirstLetter([personname characterAtIndex:0]);
+            NSString *sectionName;
+            if ((first>='a'&&first<='z')||(first>='A'&&first<='Z')) {
+               if([self searchResult:personname searchText:@"曾"])
+                  sectionName = @"Z";
+               else if([self searchResult:personname searchText:@"解"])
+                  sectionName = @"X";
+               else if([self searchResult:personname searchText:@"仇"])
+                  sectionName = @"Q";
+               else if([self searchResult:personname searchText:@"朴"])
+                  sectionName = @"P";
+               else if([self searchResult:personname searchText:@"查"])
+                  sectionName = @"Z";
+               else if([self searchResult:personname searchText:@"能"])
+                  sectionName = @"N";
+               else if([self searchResult:personname searchText:@"乐"])
+                  sectionName = @"Y";
+               else if([self searchResult:personname searchText:@"单"])
+                  sectionName = @"S";
+               else
+                  sectionName = [[NSString stringWithFormat:@"%c",pinyinFirstLetter([personname characterAtIndex:0])] uppercaseString];
             }
-            
-            [phoneDic setObject:(__bridge id)(record) forKey:[NSString stringWithFormat:@"%@%d",personPhone,recordID]];
-            
-            
-        }
-        char first=pinyinFirstLetter([personname characterAtIndex:0]);
-        NSString *sectionName;
-        if ((first>='a'&&first<='z')||(first>='A'&&first<='Z')) {
-            if([self searchResult:personname searchText:@"曾"])
-                sectionName = @"Z";
-            else if([self searchResult:personname searchText:@"解"])
-                sectionName = @"X";
-            else if([self searchResult:personname searchText:@"仇"])
-                sectionName = @"Q";
-            else if([self searchResult:personname searchText:@"朴"])
-                sectionName = @"P";
-            else if([self searchResult:personname searchText:@"查"])
-                sectionName = @"Z";
-            else if([self searchResult:personname searchText:@"能"])
-                sectionName = @"N";
-            else if([self searchResult:personname searchText:@"乐"])
-                sectionName = @"Y";
-            else if([self searchResult:personname searchText:@"单"])
-                sectionName = @"S";
-            else
-                sectionName = [[NSString stringWithFormat:@"%c",pinyinFirstLetter([personname characterAtIndex:0])] uppercaseString];
-        }
-        else {
-            sectionName=[[NSString stringWithFormat:@"%c",'#'] uppercaseString];
-        }
+            else {
+               sectionName=[[NSString stringWithFormat:@"%c",'#'] uppercaseString];
+            }
         
-        [[sectionDic objectForKey:sectionName] addObject:(__bridge id)(record)];
-        [contactDic setObject:(__bridge id)(record) forKey:[NSNumber numberWithInt:recordID]];
-    }
+           [[sectionDic objectForKey:sectionName] addObject:(__bridge id)(record)];
+           [contactDic setObject:(__bridge id)(record) forKey:[NSNumber numberWithInt:recordID]];
+         }
+       }
 
- }
+
+
+
+##显示通讯录一级索引
+       -(NSInteger)tableView:(UITableView *)tableView sectionForSectionIndexTitle:(NSString *)title atIndex:(NSInteger)index
+       {
+    
+        if ([tableView isEqual:_contactTableView])
+        {
+         //获取用户点击的一级索引的字母是哪个
+         NSString *key = [NSString stringWithFormat:@"%c",[ALPHA characterAtIndex:index]];
+        
+         //显示二级索引
+         [_indexTableView setHidden:NO];
+        
+         //获取对应字母下的联系人姓的列表
+         _indexDataSource = [self getLastNameFromRecord:key withtag:YES];
+         [_indexTableView reloadData];
+        
+         return  [ALPHA rangeOfString:title].location;
+        }
+    
+        return 0;
+       }
+
+
+
+##实现点击二级索引的cell，联系人tableView滑动到指定的位置
+       - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+         if ([tableView isEqual:_indexTableView]) {
+         NSString *name = [_indexDataSource objectAtIndex:indexPath.row];
+         NSString *first= [[NSString stringWithFormat:@"%c",pinyinFirstLetter([name characterAtIndex:0])] uppercaseString];
+         int sectionIndex = [ALPHA rangeOfString:first].location;
+         //根据first(例如：M)，找到对应M对应的的所有联系人，ABPerson类型
+         NSMutableArray *contactLastNames = [self getLastNameFromRecord:first withtag:NO];
+         NSUInteger arrayRow = [contactLastNames indexOfObject:name];
+        
+         //联系人列表滑动到指定section的指定row
+         [_contactTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:arrayRow inSection:sectionIndex] atScrollPosition:UITableViewScrollPositionTop animated:NO];
+         }
+        }
