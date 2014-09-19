@@ -11,35 +11,35 @@ contactViewController中新建两个tableView：contactsTableView、indexTableVi
 
 在这两个tableView上进行各自的操作时，要判断当前的tableView是哪个，例如计算section中row的个数的方法：
  
-  - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
-{
-    if ([tableView isEqual:_contactTableView]) {
-        NSString *key = [NSString stringWithFormat:@"%c",[ALPHA characterAtIndex:section]];
-        return [[sectionDic objectForKey:key] count];
-    } else if ([tableView isEqual:_indexTableView]){
+        - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+        {
+           if ([tableView isEqual:_contactTableView]) {
+              NSString *key = [NSString stringWithFormat:@"%c",[ALPHA characterAtIndex:section]];
+              return [[sectionDic objectForKey:key] count];
+           } else if ([tableView isEqual:_indexTableView]){
         
-        NSInteger count = 0;
+              NSInteger count = 0;
         
-        if ([_indexDataSource count] > 0) {
-            count = [_indexDataSource count];
-        } else {
-            //如果一级索引下的联系人为空，则不展示二级索引
-            [_indexTableView setHidden:YES];
+              if ([_indexDataSource count] > 0) {
+                  count = [_indexDataSource count];
+              } else {
+                  //如果一级索引下的联系人为空，则不展示二级索引
+                  [_indexTableView setHidden:YES];
+              }
+        
+              //重新为二级索引tableview计算高度
+              CGRect frame = tableView.frame;
+              frame.size.height = count * tableView.rowHeight;
+              frame.size.height = MIN(9*tableView.rowHeight, frame.size.height);
+              tableView.frame = frame;
+        
+              return count;
+          }
+          return [filteredArray count];
         }
-        
-        //重新为二级索引tableview计算高度
-        CGRect frame = tableView.frame;
-        frame.size.height = count * tableView.rowHeight;
-        frame.size.height = MIN(9*tableView.rowHeight, frame.size.height);
-        tableView.frame = frame;
-        
-        return count;
-    }
-    return [filteredArray count];
-}
 
 ##示例代码
 
-  @property (nonatomic,strong) UITableView *contactTableView;
-  @property (nonatomic,strong) UITableView *indexTableView;
-  @property (nonatomic, strong) NSArray *indexDataSource; //二级索引的数据源
+       @property (nonatomic,strong) UITableView *contactTableView;
+       @property (nonatomic,strong) UITableView *indexTableView;
+       @property (nonatomic, strong) NSArray *indexDataSource; //二级索引的数据源
