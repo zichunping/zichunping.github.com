@@ -43,3 +43,82 @@ contactViewController中新建两个tableView：contactsTableView、indexTableVi
        @property (nonatomic,strong) UITableView *contactTableView;
        @property (nonatomic,strong) UITableView *indexTableView;
        @property (nonatomic, strong) NSArray *indexDataSource; //二级索引的数据源
+
+
+##获取手机通讯录
+ /**
+ *  导入通讯录
+ */
+  -(void) loadContacts{
+    [sectionDic removeAllObjects];
+    [phoneDic   removeAllObjects];
+    [contactDic removeAllObjects];
+    for (int i = 0; i < 26; i++) [sectionDic setObject:[NSMutableArray array] forKey:[NSString stringWithFormat:@"%c",'A'+i]];
+    [sectionDic setObject:[NSMutableArray array] forKey:[NSString stringWithFormat:@"%c",'#']];
+    
+    ABAddressBookRef myAddressBook =ABAddressBookCreate();
+    
+    CFArrayRef results = ABAddressBookCopyArrayOfAllPeople(myAddressBook);
+    CFMutableArrayRef mresults=CFArrayCreateMutableCopy(kCFAllocatorDefault,
+                                                        CFArrayGetCount(results),
+                                                        results);
+    //将结果按照拼音排序，将结果放入mresults数组中
+    CFArraySortValues(mresults,
+                      CFRangeMake(0, CFArrayGetCount(results)),
+                      (CFComparatorFunction) ABPersonComparePeopleByName,
+                      (void*) ABPersonGetSortOrdering());
+    //遍历所有联系人
+    for (int k = 0; k < CFArrayGetCount(mresults); k ++) {
+        ABRecordRef record=CFArrayGetValueAtIndex(mresults,k);
+        NSString *personname = (__bridge NSString *)ABRecordCopyCompositeName(record);
+        ABMultiValueRef phone = ABRecordCopyValue(record, kABPersonPhoneProperty);
+        ABRecordID recordID=ABRecordGetRecordID(record);
+        for (int k = 0; k<ABMultiValueGetCount(phone); k++)
+        {
+            NSString * personPhone = (__bridge NSString*)ABMultiValueCopyValueAtIndex(phone, k);
+            
+            if (personPhone.length < 3) {
+                continue;
+            }
+            
+            NSRange range = NSMakeRange(0,3);
+            NSString *str=[personPhone substringWithRange:range];
+            if ([str isEqualToString:@"+86"]) {
+                personPhone=[personPhone substringFromIndex:3];
+            }
+            
+            [phoneDic setObject:(__bridge id)(record) forKey:[NSString stringWithFormat:@"%@%d",personPhone,recordID]];
+            
+            
+        }
+        char first=pinyinFirstLetter([personname characterAtIndex:0]);
+        NSString *sectionName;
+        if ((first>='a'&&first<='z')||(first>='A'&&first<='Z')) {
+            if([self searchResult:personname searchText:@"曾"])
+                sectionName = @"Z";
+            else if([self searchResult:personname searchText:@"解"])
+                sectionName = @"X";
+            else if([self searchResult:personname searchText:@"仇"])
+                sectionName = @"Q";
+            else if([self searchResult:personname searchText:@"朴"])
+                sectionName = @"P";
+            else if([self searchResult:personname searchText:@"查"])
+                sectionName = @"Z";
+            else if([self searchResult:personname searchText:@"能"])
+                sectionName = @"N";
+            else if([self searchResult:personname searchText:@"乐"])
+                sectionName = @"Y";
+            else if([self searchResult:personname searchText:@"单"])
+                sectionName = @"S";
+            else
+                sectionName = [[NSString stringWithFormat:@"%c",pinyinFirstLetter([personname characterAtIndex:0])] uppercaseString];
+        }
+        else {
+            sectionName=[[NSString stringWithFormat:@"%c",'#'] uppercaseString];
+        }
+        
+        [[sectionDic objectForKey:sectionName] addObject:(__bridge id)(record)];
+        [contactDic setObject:(__bridge id)(record) forKey:[NSNumber numberWithInt:recordID]];
+    }
+
+ }
