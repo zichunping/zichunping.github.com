@@ -7,13 +7,13 @@ description: 列举一些在Xcode中常用到的插件，提高开发效率。
 
 ## 常用的Xcode插件，持续更新中
 
-格式化代码插件
+格式化代码插件<br />
 * [Clang-format Xcode][]
 
-安装其他插件的插件(有没有好拗口。。。)
+安装其他插件的插件(有没有好拗口。。。)<br />
 * [Alcatraz][]
 
-添加注释的插件
+添加注释的插件 <br />
 * [VVDocumenter-Xcode][]
 
 
