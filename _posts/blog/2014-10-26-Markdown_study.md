@@ -2,8 +2,9 @@
 layout:     post
 title:      markdown study
 category: blog
-description: markdown语法学习 
+description: markdown语法学习
 ---
+
 ###参考资料
 * [Markdown 语法说明](http://wowubuntu.com/markdown/index.html)
 * [Markdown 在线语法](http://wlog.cn/soft/why-use-markdown.html)
