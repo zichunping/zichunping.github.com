@@ -1,3 +1,9 @@
+---
+layout:     post
+title:      iOS中NSNotification的使用
+category: blog
+description: iOS中通知中心的简单使用以及介绍
+---
 ##iOS中通知的使用
 * NSNotificationCenter是Cococa消息中心，统一管理单进程内不同线程之间的消息通讯，其职责有两个：
 	* 提供“观察者们”对感兴趣消息的监听注册
