@@ -1,8 +1,8 @@
 ---
-layout:		post
-title:		iOS应用中接入友盟分享组件
-category：blog
-description：总结下目前zhuoji项目集成友盟分享组件的过程
+layout:     post
+title:      iOS Integrated youmeng
+category: blog
+description: iOS集成友盟分享组件
 ---
 
 ###iOS应用集成友盟分享组件
